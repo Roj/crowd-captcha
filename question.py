@@ -6,8 +6,8 @@ from model import *
 def get_questions():
     """ Returns a number of questions for the users to tag.
     """
-    # TODO: implement me.
-    return Text.select()
+    # TODO: put 3 in a .yml file
+    return Text.select().where(Text.completed == False).order_by(fn.Random()).limit(3)
 
 
 def create_secret(app_uuid):

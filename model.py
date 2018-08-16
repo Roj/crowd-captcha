@@ -55,12 +55,14 @@ class Text(DatabaseModel):
     source: the source from where the text was retrieved (for instance,
       the twitter url.
     created: the date when it was created.    
+    completed: whether the text has sufficient ratings or needs to be served
     """
 
     uuid = UUIDField(default=uuid4, primary_key=True)
     text = TextField()
     source = CharField()
     created = DateTimeField(default=datetime.now)
+    completed = BooleanField(default=False)
 
 
 class Tag(DatabaseModel):

@@ -1,10 +1,13 @@
 from peewee import *
 from uuid import uuid4
+from datetime import datetime
 import yaml
 
-db_config = yaml.load(open('db.yml'))
+# db_config = yaml.load(open('db.yml'))
+# db = PostgresqlDatabase('crowd_captcha', user=db_config["user"], password=db_config["password"])   # TODO: change to mysql.
 
-db = PostgresqlDatabase('crowd_captcha', user=db_config["user"], password=db_config["password"])   # TODO: change to mysql.
+# Development db.
+db = SqliteDatabase('crowd_captcha.db')
 
 
 class DatabaseModel(Model):
@@ -25,7 +28,23 @@ class Application(DatabaseModel):
 
     uuid = UUIDField(default=uuid4, primary_key=True)
     name = CharField()
-    secret = CharField()
+    secret = CharField()  # TODO: encriptar.
+
+    @classmethod
+    def auth(Application, uuid, secret):
+        return (Application
+                    .select()
+                    .where(Application.uuid == uuid &
+                           Application.secret == secret)
+                    .count() == 1)
+
+
+    @classmethod
+    def is_valid(Application, uuid):
+        return (Application
+                    .select()
+                    .where(Application.uuid == uuid)
+                    .count() == 1)
 
 
 class Text(DatabaseModel):
@@ -41,7 +60,7 @@ class Text(DatabaseModel):
     uuid = UUIDField(default=uuid4, primary_key=True)
     text = TextField()
     source = CharField()
-    created = DateField()
+    created = DateTimeField(default=datetime.now)
 
 
 class Tag(DatabaseModel):
@@ -53,7 +72,6 @@ class Tag(DatabaseModel):
     text_uuid: the uuid of the text.
     user_id: an identifier to map whose submittion it was.
     tag: a string with the tag.
-    secret_uuid: the uuid of the secret.
     timestamp: the date this was submitted.
     validated: holds whether the form was submitted after the tag was
       recorded.
@@ -63,9 +81,8 @@ class Tag(DatabaseModel):
     text_uuid = UUIDField()
     user_id = CharField()
     tag = CharField()
-    secret_uuid = UUIDField()
-    created = DateField()
-    validated = BooleanField()
+    created = DateTimeField(default=datetime.now)
+    validated = BooleanField(default=False)
 
     # TODO: add foreign keys for application_uuid, text_uuid, and
     #       secret_uuid.
@@ -75,8 +92,7 @@ class Secret(DatabaseModel):
     """ This stores the secrets given to users to pass the captcha.
 
     uuid: the uuid of the secret.
-    text_uuid: the uuid of the text.
-    user_id: an identifier to map whose submittion it was.
+    application_uuid: the uuid of the application.
     expiration: the expiration date of the secret.
     validated: holds whether the form was submitted after the tag was
       recorded.
@@ -84,14 +100,29 @@ class Secret(DatabaseModel):
     """
     uuid = UUIDField(default=uuid4, primary_key=True)
     application_uuid = UUIDField()
-    text_uuid = UUIDField()
-    user_id = CharField()
-    expiration = DateField()
-    validated = BooleanField()
+    expiration = DateTimeField()
+    validated = BooleanField(default=False)
+
+    @classmethod
+    def is_valid(Secret, secret, app_uuid):
+        return (Secret
+                .select()
+                .where(Secret.uuid == secret &
+                       Secret.application_uuid == app_uuid &
+                       Secret.expiration <= datetime.now() &
+                       Secret.validated == False)
+                .count() > 0)
+
+    @classmethod
+    def validate(Secret, secret):
+        (Secret
+            .update({ Secret.validated: True })
+            .where(Secret.uuid == secret)
+            .execute())
 
     # TODO: add foreign keys for application_uuid and text_uuid.
 
 
 def create_tables():
     with db:
-        db.create_tables([Application, Text, Tag, Secret, Tweet])
+        db.create_tables([Application, Text, Tag, Secret])

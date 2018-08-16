@@ -1,0 +1,18 @@
+{
+  "app_uuid": "87c590b0-d62d-4dee-9eaf-36d81ae31939",
+  "user_id": "91954",
+  "tags": [
+    {
+      "text_uuid": "c163ba15-4c4b-43f2-81bf-dcf7f07d191b",
+      "tag": "a" 
+    }, 
+    {
+      "text_uuid": "88517534-b8c0-4012-8067-6f5529a86910",
+      "tag": "b"
+    }, 
+    {
+      "text_uuid": "29d1a37f-c002-40f2-beb8-cc8a3510ee85",
+      "tag": "c"
+    }
+  ]
+}

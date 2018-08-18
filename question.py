@@ -39,6 +39,12 @@ def create_tags(app_uuid, user_id, tags):
                    user_id=user_id,
                    text_uuid=tag["text_uuid"],
                    tag=tag["tag"])
+        # TODO: if we change tagging to be continuous, the integrity
+        # constraint for Text.completed should be different
+        # (e.g. Text.completed iff >2 linked tags and variance is small)
+        if len(list(Tag.select().where(Tag.text_uuid == tag["text_uuid"]))) > 2:
+            Text.update(completed=True).where(Text.uuid == tag["text_uuid"]).execute()
+
     return True
 
 

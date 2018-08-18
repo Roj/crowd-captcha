@@ -3,11 +3,15 @@ from flask import abort
 from datetime import datetime, timedelta
 from model import *
 
+
+# TODO: put in a .yml file
+
+NUM_QUESTIONS = 3
+
 def get_questions():
     """ Returns a number of questions for the users to tag.
     """
-    # TODO: put 3 in a .yml file
-    return Text.select().where(Text.completed == False).order_by(fn.Random()).limit(3)
+    return Text.select().where(Text.completed == False).order_by(fn.Random()).limit(NUM_QUESTIONS)
 
 
 def create_secret(app_uuid):
@@ -28,6 +32,9 @@ def create_tags(app_uuid, user_id, tags):
     """ Creates the tags in the database.
         Returns true on success, false otherwise.
     """
+    if len(tags) != NUM_QUESTIONS:
+        return False
+
     # Apparently peewee doesn't throw an exception when you try to create
     # a record with an invalid FK, so we have to check them manually.
     for tag in tags:

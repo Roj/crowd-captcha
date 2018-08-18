@@ -53,7 +53,7 @@ def tag():
         abort(401)
 
     if not create_tags(app_uuid, user_id, tags):
-        return "invalid text uuid"
+        return "Invalid request\n"
 
     return create_secret(app_uuid)
 

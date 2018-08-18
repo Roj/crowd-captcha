@@ -52,7 +52,9 @@ def tag():
     if not Application.is_valid(app_uuid):
         abort(401)
 
-    create_tags(app_uuid, user_id, tags)
+    if not create_tags(app_uuid, user_id, tags):
+        return "invalid text uuid"
+
     return create_secret(app_uuid)
 
 

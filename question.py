@@ -26,12 +26,20 @@ def get_js(app_uuid):
 
 def create_tags(app_uuid, user_id, tags):
     """ Creates the tags in the database.
+        Returns true on success, false otherwise.
     """
+    # Apparently peewee doesn't throw an exception when you try to create
+    # a record with an invalid FK, so we have to check them manually.
+    for tag in tags:
+        if Text.get_or_none(Text.uuid == tag["text_uuid"]) is None:
+            return False
+
     for tag in tags:
         Tag.create(application_uuid=app_uuid,
                    user_id=user_id,
                    text_uuid=tag["text_uuid"],
                    tag=tag["tag"])
+    return True
 
 
 def validate_captcha(secret, app_uuid):

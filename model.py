@@ -73,7 +73,7 @@ class Tag(DatabaseModel):
       a given text.
     text_uuid: the uuid of the text.
     user_id: an identifier to map whose submittion it was.
-    tag: a string with the tag.
+    score: a polarity score
     timestamp: the date this was submitted.
     validated: holds whether the form was submitted after the tag was
       recorded.
@@ -82,7 +82,7 @@ class Tag(DatabaseModel):
     application_uuid = ForeignKeyField(Application)
     text_uuid = ForeignKeyField(Text)
     user_id = CharField()
-    tag = CharField()
+    score = DoubleField()
     created = DateTimeField(default=datetime.now)
     validated = BooleanField(default=False)
 
